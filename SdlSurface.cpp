@@ -43,6 +43,28 @@ SdlSurface SdlSurface::ConvertSurfaceFormat(std::uint32_t format) {
   return result;
 }
 
+void SdlSurface::Lock() {
+  if (SDL_LockSurface(surface_.get()) != 0) {
+    throw runtime_error{"Error calling SDL_LockSurface: "s + SDL_GetError()};
+  }
+}
+
+void SdlSurface::Unlock() noexcept { SDL_UnlockSurface(surface_.get()); }
+
+bool SdlSurface::MustLock() const noexcept {
+  return SDL_MUSTLOCK(surface_.get());
+}
+
+SdlSurface::SdlSurface(void* pixels, int width, int height, int depth,
+                       int pitch, std::uint32_t format)
+    : surface_{SDL_CreateRGBSurfaceWithFormatFrom(pixels, width, height, depth,
+                                                  pitch, format)} {
+  if (surface_ == nullptr) {
+    throw runtime_error{"Error calling SDL_CreateRGBSurfaceWithFormatFrom: "s +
+                        SDL_GetError()};
+  }
+}
+
 void SdlSurface::Deleter::operator()(SDL_Surface* surface) const noexcept {
   SDL_FreeSurface(surface);
 }

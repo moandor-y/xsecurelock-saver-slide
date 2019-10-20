@@ -5,6 +5,7 @@
 #include <queue>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "SdlApp.hpp"
@@ -37,8 +38,9 @@ class Application {
   std::random_device random_{};
 
   State state_ = State::IDLE;
-  SdlTexture current_texture_{};
-  std::future<SdlSurface> next_image_{};
+  SdlTexture foreground_{};
+  SdlTexture background_{};
+  std::future<std::pair<SdlSurface, SdlSurface>> next_image_{};
   double state_time_remaining_;
 
   const std::string& NextImagePath();

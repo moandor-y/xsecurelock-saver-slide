@@ -69,3 +69,4 @@ fabric.properties
 
 # Custom
 /.idea/
+compile_commands.json
