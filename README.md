@@ -11,6 +11,7 @@ which shows pictures as a slide show.
 - [SDL](https://www.libsdl.org/) 2.0
 - [SDL_image](https://www.libsdl.org/projects/SDL_image/) 2.0
 - [SDL_ttf](https://www.libsdl.org/projects/SDL_ttf/) 2.0
+- [OpenCV](https://opencv.org/)
 
 ### Steps
 
