@@ -27,12 +27,10 @@
 
 namespace xsecurelock_saver_slide {
 namespace {
-using std::acos;
 using std::async;
 using std::cout;
 using std::endl;
 using std::exception;
-using std::exp;
 using std::FILE;
 using std::fread;
 using std::future;
@@ -41,7 +39,6 @@ using std::getline;
 using std::invalid_argument;
 using std::launch;
 using std::lround;
-using std::memcpy;
 using std::move;
 using std::out_of_range;
 using std::pair;
