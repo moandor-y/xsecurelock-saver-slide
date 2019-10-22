@@ -1,7 +1,5 @@
 #include "SdlTexture.hpp"
 
-#include <SDL2/SDL_image.h>
-
 #include <stdexcept>
 
 #include "SdlRenderer.hpp"
@@ -12,13 +10,6 @@ namespace {
 using std::runtime_error;
 using namespace std::string_literals;
 }  // namespace
-
-SdlTexture::SdlTexture(SdlRenderer& renderer, const std::string& file)
-    : texture_{IMG_LoadTexture(renderer.get(), file.c_str())} {
-  if (texture_ == nullptr) {
-    throw runtime_error{"Error calling IMG_LoadTexture: "s + IMG_GetError()};
-  }
-}
 
 SdlTexture::Attributes SdlTexture::QueryTexture() {
   Attributes attributes{};

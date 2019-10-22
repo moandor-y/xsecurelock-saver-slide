@@ -2,8 +2,6 @@
 
 #include <SDL2/SDL.h>
 
-#include <opencv2/opencv.hpp>
-
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -15,6 +13,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <opencv2/opencv.hpp>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -81,10 +80,10 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
     }
     cv::resize(image, image, {image_width, image_height}, 0, 0, CV_INTER_AREA);
 
+    vector<unsigned char> buffer;
+    cv::imencode(".bmp", image, buffer);
     result.first =
-        SdlSurface{image.data, image_width,     image_height,
-                   8,          image_width * 3, SDL_PIXELFORMAT_BGR24}
-            .ConvertSurfaceFormat(SDL_PIXELFORMAT_ARGB8888);
+        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}};
 
     image = cv::imread(path);
     image_width = image.cols;
@@ -103,10 +102,10 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
                CV_INTER_LANCZOS4);
     cv::GaussianBlur(image, image, {}, screen_width * 0.006);
 
+    buffer.clear();
+    cv::imencode(".bmp", image, buffer);
     result.second =
-        SdlSurface{image.data, screen_width,     screen_height,
-                   8,          screen_width * 3, SDL_PIXELFORMAT_BGR24}
-            .ConvertSurfaceFormat(SDL_PIXELFORMAT_ARGB8888);
+        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}};
 
     return result;
   };
@@ -136,8 +135,8 @@ SdlWindow CreateWindow() {
 
   } catch (const ConvertException&) {
     return SdlWindow{
-        "T", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280,
-        720, SDL_WINDOW_SHOWN};
+        "T",  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 2560,
+        1440, SDL_WINDOW_SHOWN};
   }
 }
 

@@ -17,7 +17,9 @@ class SdlSurface {
   SdlSurface(SdlTtfFont&, const std::string& text, SDL_Color fg);
   SdlSurface(void* pixels, int width, int height, int depth, int pitch,
              std::uint32_t format);
+  SdlSurface(int width, int height, int depth, std::uint32_t format);
   explicit SdlSurface(SdlRwOps&);
+  explicit SdlSurface(SdlRwOps&&);
 
   SdlSurface ConvertSurfaceFormat(std::uint32_t format);
   void Lock();

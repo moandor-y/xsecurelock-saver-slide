@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "SdlApp.hpp"
-#include "SdlImage.hpp"
 #include "SdlRenderer.hpp"
 #include "SdlSurface.hpp"
 #include "SdlTexture.hpp"
@@ -28,7 +27,6 @@ class Application {
   enum class State { IDLE, FADE_OUT, FADE_IN };
 
   SdlApp sdl_app_{};
-  SdlImage sdl_image_{};
   SdlTtf sdl_ttf_{};
   SdlWindow sdl_window_;
   SdlRenderer sdl_renderer_;

@@ -1,7 +1,6 @@
 #include "SdlSurface.hpp"
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
 #include <stdexcept>
@@ -25,10 +24,9 @@ SdlSurface::SdlSurface(xsecurelock_saver_slide::SdlTtfFont& font,
   }
 }
 
-SdlSurface::SdlSurface(SdlRwOps& ops)
-    : surface_{IMG_Load_RW(ops.get(), SDL_FALSE)} {
+SdlSurface::SdlSurface(SdlRwOps& ops) : surface_{SDL_LoadBMP_RW(ops.get(), 0)} {
   if (surface_ == nullptr) {
-    throw runtime_error{"Error calling IMG_Load_RW: "s + IMG_GetError()};
+    throw runtime_error{"Error calling SDL_LoadBMP_RW: "s + SDL_GetError()};
   }
 }
 
@@ -64,6 +62,17 @@ SdlSurface::SdlSurface(void* pixels, int width, int height, int depth,
                         SDL_GetError()};
   }
 }
+
+SdlSurface::SdlSurface(int width, int height, int depth, std::uint32_t format)
+    : surface_{
+          SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format)} {
+  if (surface_ == nullptr) {
+    throw runtime_error{"Error calling SDL_CreateRGBSurfaceWithFormat: "s +
+                        SDL_GetError()};
+  }
+}
+
+SdlSurface::SdlSurface(SdlRwOps&& ops) : SdlSurface(ops) {}
 
 void SdlSurface::Deleter::operator()(SDL_Surface* surface) const noexcept {
   SDL_FreeSurface(surface);

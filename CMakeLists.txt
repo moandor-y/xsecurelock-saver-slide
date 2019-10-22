@@ -8,23 +8,7 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 
-add_executable(xsecurelock_saver_slide main.cpp Application.cpp Application.hpp SdlApp.cpp SdlApp.hpp SdlImage.cpp SdlImage.hpp SdlTtf.cpp SdlTtf.hpp SdlWindow.cpp SdlWindow.hpp SdlRenderer.cpp SdlRenderer.hpp SdlTexture.cpp SdlTexture.hpp SdlTtfFont.cpp SdlTtfFont.hpp SdlSurface.cpp SdlSurface.hpp SdlRwOps.cpp SdlRwOps.hpp)
-
-FIND_LIBRARY(SDL2_IMAGE_LIBRARY
-        NAMES SDL2_image
-        HINTS
-        ${SDL2}
-        $ENV{SDL2}
-        $ENV{SDL2_IMAGE}
-        PATH_SUFFIXES lib64 lib
-        lib/x64
-        x86_64-w64-mingw32/lib
-        PATHS
-        /sw
-        /opt/local
-        /opt/csw
-        /opt
-        )
+add_executable(xsecurelock_saver_slide main.cpp Application.cpp Application.hpp SdlApp.cpp SdlApp.hpp SdlTtf.cpp SdlTtf.hpp SdlWindow.cpp SdlWindow.hpp SdlRenderer.cpp SdlRenderer.hpp SdlTexture.cpp SdlTexture.hpp SdlTtfFont.cpp SdlTtfFont.hpp SdlSurface.cpp SdlSurface.hpp SdlRwOps.cpp SdlRwOps.hpp)
 
 FIND_LIBRARY(SDL2_TTF_LIBRARY
         NAMES SDL2_ttf
@@ -43,4 +27,4 @@ FIND_LIBRARY(SDL2_TTF_LIBRARY
         )
 
 
-target_link_libraries(xsecurelock_saver_slide ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${OpenCV_LIBS} pthread)
+target_link_libraries(xsecurelock_saver_slide ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARY} ${OpenCV_LIBS} pthread)
