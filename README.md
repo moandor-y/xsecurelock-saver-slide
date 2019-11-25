@@ -45,7 +45,3 @@ Then expect the executable to be created at `./xsecurelock_saver_slide`.
 See the [installation](https://github.com/google/xsecurelock#installation) and
 [options](https://github.com/google/xsecurelock#options) of XSecureLock for
 more information.
-
-## Known Issues
-
-- Only supports PNG files.
