@@ -310,7 +310,11 @@ void Application::Run() {
 
 Application::Application()
     : sdl_window_{CreateWindow()},
-      sdl_renderer_{sdl_window_, -1, SDL_RENDERER_ACCELERATED},
+      sdl_renderer_{
+          sdl_window_,
+          -1,
+          SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC,
+      },
       state_time_remaining_{kIdleTime} {
   {
     const char* cmd = getenv("XSECURELOCK_SAVER_SLIDE_LIST_IMAGES_COMMAND");
