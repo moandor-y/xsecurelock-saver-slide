@@ -46,4 +46,13 @@ void SdlTexture::SetTextureBlendMode(SDL_BlendMode mode) {
 void SdlTexture::Deleter::operator()(SDL_Texture* texture) const noexcept {
   SDL_DestroyTexture(texture);
 }
+
+SdlTexture::SdlTexture(xsecurelock_saver_slide::SdlRenderer& renderer,
+                       std::uint32_t format, int access, int width, int height)
+    : texture_{
+          SDL_CreateTexture(renderer.get(), format, access, width, height)} {
+  if (texture_ == nullptr) {
+    throw runtime_error{"Error calling SDL_CreateTexture: "s + SDL_GetError()};
+  }
+}
 }  // namespace xsecurelock_saver_slide

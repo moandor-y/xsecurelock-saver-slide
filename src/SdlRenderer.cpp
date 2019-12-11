@@ -44,7 +44,7 @@ void SdlRenderer::RenderCopy(SdlTexture& texture, const SDL_Rect* srcrect,
 
 void SdlRenderer::RenderPresent() { SDL_RenderPresent(renderer_.get()); }
 
-SDL_RendererInfo SdlRenderer::GetRendererInfo() {
+SDL_RendererInfo SdlRenderer::GetRendererInfo() const {
   SDL_RendererInfo info{};
   if (SDL_GetRendererInfo(renderer_.get(), &info) != 0) {
     throw runtime_error{"Error calling SDL_GetRendererInfo: "s +
@@ -65,5 +65,16 @@ SdlRenderer::OutputSize SdlRenderer::GetRendererOutputSize() {
 
 void SdlRenderer::Deleter::operator()(SDL_Renderer* renderer) const noexcept {
   SDL_DestroyRenderer(renderer);
+}
+
+SDL_Texture* SdlRenderer::GetRenderTarget() const noexcept {
+  return SDL_GetRenderTarget(renderer_.get());
+}
+
+void SdlRenderer::SetRenderTarget(SDL_Texture* texture) {
+  if (SDL_SetRenderTarget(renderer_.get(), texture) != 0) {
+    throw runtime_error{"Error calling SDL_SetRenderTarget: "s +
+                        SDL_GetError()};
+  }
 }
 }  // namespace xsecurelock_saver_slide

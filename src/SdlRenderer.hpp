@@ -1,5 +1,5 @@
-#ifndef XSECURELOCK_SAVER_SLIDE_SDLRENDERER_HPP_
-#define XSECURELOCK_SAVER_SLIDE_SDLRENDERER_HPP_
+#ifndef XSECURELOCK_SAVER_SLIDE_SDL_RENDERER_HPP_
+#define XSECURELOCK_SAVER_SLIDE_SDL_RENDERER_HPP_
 
 #include <SDL2/SDL.h>
 
@@ -21,7 +21,9 @@ class SdlRenderer {
   void RenderCopy(SdlTexture&, const SDL_Rect* srcrect,
                   const SDL_Rect* dstrect);
   void RenderPresent();
-  SDL_RendererInfo GetRendererInfo();
+  [[nodiscard]] SDL_RendererInfo GetRendererInfo() const;
+  [[nodiscard]] SDL_Texture* GetRenderTarget() const noexcept;
+  void SetRenderTarget(SDL_Texture*);
 
   SDL_Renderer* get() { return renderer_.get(); }
 
@@ -41,4 +43,4 @@ class SdlRenderer {
 };
 }  // namespace xsecurelock_saver_slide
 
-#endif  // XSECURELOCK_SAVER_SLIDE_SDLRENDERER_HPP_
+#endif  // XSECURELOCK_SAVER_SLIDE_SDL_RENDERER_HPP_

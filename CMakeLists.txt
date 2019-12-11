@@ -29,6 +29,11 @@ add_executable(
         src/SdlSurface.hpp
         src/SdlRwOps.cpp
         src/SdlRwOps.hpp
+        src/View.hpp
+        src/ImageView.hpp
+        src/ImageView.cpp
+        src/ViewGroup.hpp
+        src/ViewGroup.cpp
 )
 
 FIND_LIBRARY(

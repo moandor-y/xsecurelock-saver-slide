@@ -1,5 +1,5 @@
-#ifndef XSECURELOCK_SAVER_SLIDE_SDLTTF_HPP_
-#define XSECURELOCK_SAVER_SLIDE_SDLTTF_HPP_
+#ifndef XSECURELOCK_SAVER_SLIDE_SDL_TTF_HPP_
+#define XSECURELOCK_SAVER_SLIDE_SDL_TTF_HPP_
 
 namespace xsecurelock_saver_slide {
 class SdlTtf {
@@ -11,4 +11,4 @@ class SdlTtf {
 };
 }  // namespace xsecurelock_saver_slide
 
-#endif  // XSECURELOCK_SAVER_SLIDE_SDLTTF_HPP_
+#endif  // XSECURELOCK_SAVER_SLIDE_SDL_TTF_HPP_

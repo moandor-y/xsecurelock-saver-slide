@@ -1,5 +1,5 @@
-#ifndef XSECURELOCK_SAVER_SLIDE_SDLTEXTURE_HPP_
-#define XSECURELOCK_SAVER_SLIDE_SDLTEXTURE_HPP_
+#ifndef XSECURELOCK_SAVER_SLIDE_SDL_TEXTURE_HPP_
+#define XSECURELOCK_SAVER_SLIDE_SDL_TEXTURE_HPP_
 
 #include <SDL2/SDL.h>
 
@@ -14,8 +14,9 @@ class SdlSurface;
 class SdlTexture {
  public:
   SdlTexture() = default;
-  SdlTexture(SdlRenderer&, const std::string& file);
   SdlTexture(SdlRenderer&, SdlSurface&);
+  SdlTexture(SdlRenderer&, std::uint32_t format, int access, int width,
+             int height);
 
   struct Attributes {
     std::uint32_t format;
@@ -39,4 +40,4 @@ class SdlTexture {
 };
 }  // namespace xsecurelock_saver_slide
 
-#endif  // XSECURELOCK_SAVER_SLIDE_SDLTEXTURE_HPP_
+#endif  // XSECURELOCK_SAVER_SLIDE_SDL_TEXTURE_HPP_

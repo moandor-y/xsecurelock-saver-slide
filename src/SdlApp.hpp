@@ -1,5 +1,5 @@
-#ifndef XSECURELOCK_SAVER_SLIDE_SDLAPP_HPP_
-#define XSECURELOCK_SAVER_SLIDE_SDLAPP_HPP_
+#ifndef XSECURELOCK_SAVER_SLIDE_SDL_APP_HPP_
+#define XSECURELOCK_SAVER_SLIDE_SDL_APP_HPP_
 
 #include <cstdint>
 #include <string>
@@ -14,4 +14,4 @@ class SdlApp {
 };
 }  // namespace xsecurelock_saver_slide
 
-#endif  // XSECURELOCK_SAVER_SLIDE_SDLAPP_HPP_
+#endif  // XSECURELOCK_SAVER_SLIDE_SDL_APP_HPP_
