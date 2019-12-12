@@ -13,9 +13,9 @@ using std::runtime_error;
 using namespace std::string_literals;
 }  // namespace
 
-void SdlRenderer::SetRendererDrawColor(std::uint8_t r, std::uint8_t g,
-                                       std::uint8_t b, std::uint8_t a) {
-  if (SDL_SetRenderDrawColor(renderer_.get(), r, g, b, a) != 0) {
+void SdlRenderer::SetRenderDrawColor(Color color) {
+  if (SDL_SetRenderDrawColor(renderer_.get(), color.r, color.g, color.b,
+                             color.a) != 0) {
     throw runtime_error{"Error calling SDL_SetRenderDrawColor: "s +
                         SDL_GetError()};
   }
@@ -76,5 +76,15 @@ void SdlRenderer::SetRenderTarget(SDL_Texture* texture) {
     throw runtime_error{"Error calling SDL_SetRenderTarget: "s +
                         SDL_GetError()};
   }
+}
+
+SdlRenderer::Color SdlRenderer::GetRenderDrawColor() const {
+  Color result{};
+  if (SDL_GetRenderDrawColor(renderer_.get(), &result.r, &result.g, &result.b,
+                             &result.a) != 0) {
+    throw runtime_error{"Error calling SDL_GetRenderDrawColor: "s +
+                        SDL_GetError()};
+  }
+  return result;
 }
 }  // namespace xsecurelock_saver_slide

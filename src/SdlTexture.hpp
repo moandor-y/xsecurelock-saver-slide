@@ -30,6 +30,7 @@ class SdlTexture {
   void SetTextureBlendMode(SDL_BlendMode);
 
   SDL_Texture* get() { return texture_.get(); }
+  [[nodiscard]] bool valid() const { return texture_ != nullptr; }
 
  private:
   struct Deleter {

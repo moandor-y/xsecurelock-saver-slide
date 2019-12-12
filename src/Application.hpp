@@ -1,6 +1,9 @@
 #ifndef XSECURELOCK_SAVER_SLIDE_APPLICATION_HPP_
 #define XSECURELOCK_SAVER_SLIDE_APPLICATION_HPP_
 
+#include <SDL2/SDL.h>
+
+#include <cstdint>
 #include <future>
 #include <queue>
 #include <random>
@@ -22,6 +25,8 @@ class Application {
   Application(const Application&) = delete;
   Application& operator=(const Application&) = delete;
   void Run();
+
+  static std::uint32_t GetPixelFormat();
 
  private:
   enum class State { IDLE, FADE_OUT, FADE_IN };

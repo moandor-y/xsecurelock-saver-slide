@@ -15,8 +15,6 @@ class SdlRenderer {
   SdlRenderer() noexcept = default;
   SdlRenderer(SdlWindow&, int index, std::uint32_t flags);
 
-  void SetRendererDrawColor(std::uint8_t r, std::uint8_t g, std::uint8_t b,
-                            std::uint8_t a);
   void RenderClear();
   void RenderCopy(SdlTexture&, const SDL_Rect* srcrect,
                   const SDL_Rect* dstrect);
@@ -32,7 +30,16 @@ class SdlRenderer {
     int height;
   };
 
+  struct Color {
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+    std::uint8_t a;
+  };
+
   OutputSize GetRendererOutputSize();
+  void SetRenderDrawColor(Color);
+  [[nodiscard]] Color GetRenderDrawColor() const;
 
  private:
   struct Deleter {

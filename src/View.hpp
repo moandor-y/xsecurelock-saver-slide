@@ -11,6 +11,7 @@ class View {
   View& operator=(const View&) = delete;
   virtual ~View() = default;
 
+  virtual void OnPreDraw(SdlRenderer&) {}
   virtual void Draw(SdlRenderer&) = 0;
 
   [[nodiscard]] int top() const { return top_; }

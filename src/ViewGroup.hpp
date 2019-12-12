@@ -4,21 +4,17 @@
 #include <memory>
 #include <vector>
 
-#include "SdlRenderer.hpp"
 #include "SdlTexture.hpp"
-#include "View.hpp"
+#include "TextureView.hpp"
 
 namespace xsecurelock_saver_slide {
-class ViewGroup : public View {
+class ViewGroup : public TextureView {
  public:
   void Draw(SdlRenderer&) override;
-  [[nodiscard]] double GetAlpha() const override;
-  void SetAlpha(double) override;
+  SdlTexture CreateTexture(SdlRenderer&) override;
 
  private:
-  SdlTexture texture_;
-  double alpha_ = 1;
-  std::vector<std::unique_ptr<View>> views_;
+  std::vector<std::unique_ptr<View>> children_;
 };
 }  // namespace xsecurelock_saver_slide
 

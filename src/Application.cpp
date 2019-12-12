@@ -58,6 +58,8 @@ constexpr double kIdleTime = 15;
 constexpr double kFadeOutTime = 0.5;
 constexpr double kFadeInTime = 0.5;
 
+constexpr uint32_t kPixelFormat = SDL_PIXELFORMAT_ARGB8888;
+
 future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
                                                int screen_width,
                                                int screen_height) {
@@ -83,7 +85,8 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
     vector<unsigned char> buffer;
     cv::imencode(".bmp", image, buffer);
     result.first =
-        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}};
+        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}}
+            .ConvertSurfaceFormat(kPixelFormat);
 
     image = cv::imread(path);
     image_width = image.cols;
@@ -105,7 +108,8 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
     buffer.clear();
     cv::imencode(".bmp", image, buffer);
     result.second =
-        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}};
+        SdlSurface{SdlRwOps{buffer.data(), static_cast<int>(buffer.size())}}
+            .ConvertSurfaceFormat(kPixelFormat);
 
     return result;
   };
@@ -198,7 +202,7 @@ void Application::Run() {
 
     auto screen_size = sdl_renderer_.GetRendererOutputSize();
 
-    sdl_renderer_.SetRendererDrawColor(0, 0, 0, 0xff);
+    sdl_renderer_.SetRenderDrawColor({0, 0, 0, 0xff});
     sdl_renderer_.RenderClear();
 
     state_time_remaining_ -= time_delta;
@@ -369,4 +373,6 @@ SdlTexture Application::TextureFromSurface(SdlSurface& surface) {
   texture.SetTextureBlendMode(SDL_BLENDMODE_BLEND);
   return texture;
 }
+
+uint32_t Application::GetPixelFormat() { return kPixelFormat; }
 }  // namespace xsecurelock_saver_slide
