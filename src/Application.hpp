@@ -53,6 +53,7 @@ class Application {
 
   const std::string& NextImagePath();
   SdlTexture TextureFromSurface(SdlSurface&);
+  double GetIdleTime();
 };
 }  // namespace xsecurelock_saver_slide
 

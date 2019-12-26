@@ -52,12 +52,14 @@ using std::stringstream;
 using std::uint32_t;
 using std::uint64_t;
 using std::uniform_int_distribution;
+using std::uniform_real_distribution;
 using std::unique_ptr;
 using std::vector;
 
 using Size = std::int_fast64_t;
 
 constexpr double kIdleTime = 15;
+constexpr double kIdleTimeRandom = 10;
 constexpr double kFadeOutTime = 0.5;
 constexpr double kFadeInTime = 0.5;
 
@@ -234,7 +236,7 @@ void Application::Run() {
       }
       case State::FADE_IN: {
         if (state_time_remaining_ < 0) {
-          state_time_remaining_ = kIdleTime;
+          state_time_remaining_ = GetIdleTime();
           state_ = State::IDLE;
         }
         break;
@@ -329,7 +331,7 @@ Application::Application()
           -1,
           SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC,
       },
-      state_time_remaining_{kIdleTime} {
+      state_time_remaining_{GetIdleTime()} {
   {
     const char* cmd = getenv("XSECURELOCK_SAVER_SLIDE_LIST_IMAGES_COMMAND");
     if (cmd == nullptr) {
@@ -395,4 +397,9 @@ SdlTexture Application::TextureFromSurface(SdlSurface& surface) {
 }
 
 uint32_t Application::GetPixelFormat() { return kPixelFormat; }
+
+double Application::GetIdleTime() {
+  return kIdleTime +
+         uniform_real_distribution<double>{0, kIdleTimeRandom}(random_);
+}
 }  // namespace xsecurelock_saver_slide
