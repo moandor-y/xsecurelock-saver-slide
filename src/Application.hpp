@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <future>
+#include <memory>
 #include <queue>
 #include <random>
 #include <string>
@@ -17,8 +18,11 @@
 #include "SdlTexture.hpp"
 #include "SdlTtf.hpp"
 #include "SdlWindow.hpp"
+#include "View.hpp"
 
 namespace xsecurelock_saver_slide {
+class ImageView;
+
 class Application {
  public:
   Application();
@@ -41,8 +45,9 @@ class Application {
   std::random_device random_{};
 
   State state_ = State::IDLE;
-  SdlTexture foreground_{};
-  SdlTexture background_{};
+  std::unique_ptr<View> content_;
+  ImageView* foreground_;
+  ImageView* background_;
   std::future<std::pair<SdlSurface, SdlSurface>> next_image_{};
   double state_time_remaining_;
 

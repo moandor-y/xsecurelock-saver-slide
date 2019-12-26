@@ -36,6 +36,7 @@ add_executable(
         src/ViewGroup.cpp
         src/TextureView.hpp
         src/TextureView.cpp
+        src/View.cpp
 )
 
 FIND_LIBRARY(

@@ -18,16 +18,18 @@
 #include <utility>
 #include <vector>
 
+#include "ImageView.hpp"
 #include "SdlRwOps.hpp"
 #include "SdlSurface.hpp"
 #include "SdlTexture.hpp"
 #include "SdlTtfFont.hpp"
 #include "SdlWindow.hpp"
+#include "ViewGroup.hpp"
 
 namespace xsecurelock_saver_slide {
 namespace {
 using std::async;
-using std::cout;
+using std::clog;
 using std::endl;
 using std::exception;
 using std::FILE;
@@ -38,6 +40,7 @@ using std::getline;
 using std::invalid_argument;
 using std::launch;
 using std::lround;
+using std::make_unique;
 using std::move;
 using std::out_of_range;
 using std::pair;
@@ -165,7 +168,7 @@ SdlTtfFont CreateFont(int size) {
   if (cmd == nullptr) {
     cmd = "find /usr/share/fonts -name 'NotoSans-Regular.ttf'";
   }
-  cout << "Command to find font: " << cmd << endl;
+  clog << "Command to find font: " << cmd << endl;
 
   stringstream stream = ExecuteCommand(cmd);
   string path;
@@ -176,9 +179,9 @@ SdlTtfFont CreateFont(int size) {
 
 void Application::Run() {
   SDL_RendererInfo renderer_info = sdl_renderer_.GetRendererInfo();
-  cout << "Renderer texture formats: " << endl;
+  clog << "Renderer texture formats: " << endl;
   for (Size i = 0; i < renderer_info.num_texture_formats; ++i) {
-    cout << SDL_GetPixelFormatName(renderer_info.texture_formats[i]) << endl;
+    clog << SDL_GetPixelFormatName(renderer_info.texture_formats[i]) << endl;
   }
 
   SdlTtfFont font_large{CreateFont(192)};
@@ -219,8 +222,8 @@ void Application::Run() {
       case State::FADE_OUT: {
         if (state_time_remaining_ < 0) {
           pair<SdlSurface, SdlSurface> surfaces = next_image_.get();
-          foreground_ = TextureFromSurface(surfaces.first);
-          background_ = TextureFromSurface(surfaces.second);
+          foreground_->SetImage(surfaces.first);
+          background_->SetImage(surfaces.second);
           next_image_ =
               LoadImage(NextImagePath(), screen_size.width, screen_size.height);
 
@@ -284,29 +287,36 @@ void Application::Run() {
       sdl_renderer_.RenderCopy(texture, nullptr, &dest);
     }
 
-    {
-      background_.SetTextureAlphaMod(lround(alpha * 255));
-      sdl_renderer_.RenderCopy(background_, nullptr, nullptr);
+    content_->top(0);
+    content_->left(0);
+    content_->bottom(screen_size.height);
+    content_->right(screen_size.width);
 
-      auto texture_attr = foreground_.QueryTexture();
-      double texture_ratio =
-          static_cast<double>(texture_attr.width) / texture_attr.height;
+    background_->top(0);
+    background_->left(0);
+    background_->bottom(screen_size.height);
+    background_->right(screen_size.width);
+
+    {
+      int image_width = foreground_->surface_width();
+      int image_height = foreground_->surface_height();
+      double image_ratio = static_cast<double>(image_width) / image_height;
       double screen_ratio =
           static_cast<double>(screen_size.width) / screen_size.height;
 
-      SDL_Rect dest{};
-      if (texture_ratio > screen_ratio) {
-        dest.x = 0;
-        dest.y = (screen_size.height - texture_attr.height) / 2;
+      if (image_ratio > screen_ratio) {
+        foreground_->left(0);
+        foreground_->top((screen_size.height - image_height) / 2);
       } else {
-        dest.x = screen_size.width - texture_attr.width;
-        dest.y = 0;
+        foreground_->left(screen_size.width - image_width);
+        foreground_->top(0);
       }
-      dest.w = texture_attr.width;
-      dest.h = texture_attr.height;
-      foreground_.SetTextureAlphaMod(lround(alpha * 255));
-      sdl_renderer_.RenderCopy(foreground_, nullptr, &dest);
+      foreground_->right(foreground_->left() + image_width);
+      foreground_->bottom(foreground_->top() + image_height);
     }
+
+    content_->alpha(alpha);
+    content_->Draw();
 
     sdl_renderer_.RenderPresent();
   }
@@ -325,7 +335,7 @@ Application::Application()
     if (cmd == nullptr) {
       cmd = "find ~/Pictures -type f -name '*.png'";
     }
-    cout << "Command to list images: " << cmd << endl;
+    clog << "Command to list images: " << cmd << endl;
 
     stringstream stream = ExecuteCommand(cmd);
     string path;
@@ -333,9 +343,9 @@ Application::Application()
       image_paths_.push_back(move(path));
     }
   }
-  cout << "Found " << image_paths_.size() << " images: " << endl;
+  clog << "Found " << image_paths_.size() << " images: " << endl;
   for (const string& path : image_paths_) {
-    cout << path << endl;
+    clog << path << endl;
   }
   if (image_paths_.size() < 2) {
     throw runtime_error{"Too few images to load"};
@@ -352,8 +362,18 @@ Application::Application()
 
   pair<SdlSurface, SdlSurface> surfaces =
       LoadImage(NextImagePath(), screen_size.width, screen_size.height).get();
-  foreground_ = TextureFromSurface(surfaces.first);
-  background_ = TextureFromSurface(surfaces.second);
+  {
+    unique_ptr<ViewGroup> content = make_unique<ViewGroup>(sdl_renderer_);
+    unique_ptr<ImageView> foreground =
+        make_unique<ImageView>(sdl_renderer_, surfaces.first);
+    unique_ptr<ImageView> background =
+        make_unique<ImageView>(sdl_renderer_, surfaces.second);
+    foreground_ = foreground.get();
+    background_ = background.get();
+    content->AddChild(move(background));
+    content->AddChild(move(foreground));
+    content_ = move(content);
+  }
   next_image_ =
       LoadImage(NextImagePath(), screen_size.width, screen_size.height);
 }

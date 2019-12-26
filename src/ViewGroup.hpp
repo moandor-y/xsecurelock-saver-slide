@@ -10,11 +10,16 @@
 namespace xsecurelock_saver_slide {
 class ViewGroup : public TextureView {
  public:
-  void Draw(SdlRenderer&) override;
-  SdlTexture CreateTexture(SdlRenderer&) override;
+  using TextureView::TextureView;
+  void AddChild(std::unique_ptr<View>);
+
+ protected:
+  void OnDraw() override;
 
  private:
   std::vector<std::unique_ptr<View>> children_;
+
+  SdlTexture CreateTexture() override;
 };
 }  // namespace xsecurelock_saver_slide
 

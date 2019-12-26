@@ -1,37 +1,39 @@
 #include "ImageView.hpp"
 
+#include <algorithm>
+
 #include "SdlRenderer.hpp"
 
-namespace {
-using std::move;
-}
-
 namespace xsecurelock_saver_slide {
-ImageView::ImageView(SdlRenderer& renderer, SdlSurface surface)
-    : texture_{renderer, surface} {
+namespace {
+using std::min;
+using std::move;
+}  // namespace
+
+ImageView::ImageView(SdlRenderer& renderer, SdlSurface& surface)
+    : View(renderer), texture_{renderer, surface} {
+  surface_width_ = surface.width();
+  surface_height_ = surface.height();
   texture_.SetTextureBlendMode(SDL_BLENDMODE_BLEND);
 }
 
-void ImageView::Draw(SdlRenderer& renderer) {
+void ImageView::OnDraw() {
+  if (!texture_.valid()) {
+    return;
+  }
+
   SDL_Rect rect{};
   rect.x = left();
   rect.y = top();
   rect.w = right() - left();
   rect.h = bottom() - top();
 
-  renderer.RenderCopy(texture_, nullptr, &rect);
+  renderer().RenderCopy(texture_, nullptr, &rect);
 }
 
-double ImageView::GetAlpha() const { return alpha_; }
-
-void ImageView::SetAlpha(double value) {
-  if (value < 0) {
-    value = 0;
-  } else if (value > 1) {
-    value = 1;
-  }
-  alpha_ = value;
-
-  texture_.SetTextureAlphaMod(lround(alpha_ * 255));
+void ImageView::SetImage(SdlSurface& surface) {
+  texture_ = SdlTexture{renderer(), surface};
+  surface_width_ = surface.width();
+  surface_height_ = surface.height();
 }
 }  // namespace xsecurelock_saver_slide

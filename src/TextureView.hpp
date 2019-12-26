@@ -9,22 +9,21 @@
 namespace xsecurelock_saver_slide {
 class TextureView : public View {
  public:
-  void OnPreDraw(SdlRenderer&) override;
-  void Draw(SdlRenderer&) override;
-  void SetAlpha(double) override;
-
-  [[nodiscard]] double alpha() const { return alpha_; }
+  using View::View;
 
  protected:
   SdlTexture& texture() { return texture_; }
 
+  void OnDraw() override;
+  void OnPreDraw() override;
+
  private:
   SdlTexture texture_;
-  double alpha_ = 1;
-  bool alpha_dirty_ = false;
-  bool texture_dirty_ = false;
+  double texture_alpha_{};
+  int texture_width_{};
+  int texture_height_{};
 
-  virtual SdlTexture CreateTexture(SdlRenderer&) = 0;
+  virtual SdlTexture CreateTexture() = 0;
 };
 }  // namespace xsecurelock_saver_slide
 
