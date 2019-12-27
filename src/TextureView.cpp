@@ -4,11 +4,6 @@
 
 namespace xsecurelock_saver_slide {
 void TextureView::OnDraw() {
-  if (texture_alpha_ != alpha()) {
-    texture_.SetTextureAlphaMod(lround(alpha() * 255));
-    texture_alpha_ = alpha();
-  }
-
   SDL_Rect rect{};
   rect.x = left();
   rect.y = top();
@@ -26,6 +21,11 @@ void TextureView::OnPreDraw() {
     texture_ = CreateTexture();
     texture_width_ = width;
     texture_height_ = height;
+  }
+
+  if (texture_alpha_ != alpha()) {
+    texture_.SetTextureAlphaMod(lround(alpha() * 255));
+    texture_alpha_ = alpha();
   }
 }
 }  // namespace xsecurelock_saver_slide

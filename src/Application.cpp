@@ -24,6 +24,7 @@
 #include "SdlTexture.hpp"
 #include "SdlTtfFont.hpp"
 #include "SdlWindow.hpp"
+#include "Utility.hpp"
 #include "ViewGroup.hpp"
 
 namespace xsecurelock_saver_slide {
@@ -49,6 +50,7 @@ using std::runtime_error;
 using std::shuffle;
 using std::string;
 using std::stringstream;
+using std::swap;
 using std::uint32_t;
 using std::uint64_t;
 using std::uniform_int_distribution;
@@ -59,9 +61,8 @@ using std::vector;
 using Size = std::int_fast64_t;
 
 constexpr double kIdleTime = 15;
-constexpr double kIdleTimeRandom = 10;
-constexpr double kFadeOutTime = 0.5;
-constexpr double kFadeInTime = 0.5;
+constexpr double kIdleTimeRandom = 15;
+constexpr double kTransitionTime = 2;
 
 constexpr uint32_t kPixelFormat = SDL_PIXELFORMAT_ARGB8888;
 
@@ -177,6 +178,24 @@ SdlTtfFont CreateFont(int size) {
   getline(stream, path);
   return SdlTtfFont{path, size};
 }
+
+void SetupImagePosition(ImageView& foreground, int screen_width,
+                        int screen_height) {
+  int image_width = foreground.surface_width();
+  int image_height = foreground.surface_height();
+  double image_ratio = static_cast<double>(image_width) / image_height;
+  double screen_ratio = static_cast<double>(screen_width) / screen_height;
+
+  if (image_ratio > screen_ratio) {
+    foreground.left(0);
+    foreground.top((screen_height - image_height) / 2);
+  } else {
+    foreground.left(screen_width - image_width);
+    foreground.top(0);
+  }
+  foreground.right(foreground.left() + image_width);
+  foreground.bottom(foreground.top() + image_height);
+}
 }  // namespace
 
 void Application::Run() {
@@ -198,6 +217,8 @@ void Application::Run() {
             .count();
     time = now;
 
+    time_delta = 1.0 / 60;
+
     SDL_Event event;
     while (SDL_PollEvent(&event) != 0) {
       if (event.type == SDL_QUIT) {
@@ -207,58 +228,128 @@ void Application::Run() {
 
     auto screen_size = sdl_renderer_.GetRendererOutputSize();
 
+    View* views[]{content_.get(), content_next_.get(), background_,
+                  background_next_};
+    for (View* view : views) {
+      view->left(0);
+      view->right(screen_size.width);
+      view->top(0);
+      view->bottom(screen_size.height);
+    }
+
     sdl_renderer_.SetRenderDrawColor({0, 0, 0, 0xff});
     sdl_renderer_.RenderClear();
 
     state_time_remaining_ -= time_delta;
     switch (state_) {
-      case State::IDLE: {
+      case State::kIdle: {
         namespace chrono = std::chrono;
         if (state_time_remaining_ < 0 &&
             next_image_.wait_for(chrono::seconds(0)) == future_status::ready) {
-          state_time_remaining_ = kFadeOutTime;
-          state_ = State::FADE_OUT;
-        }
-        break;
-      }
-      case State::FADE_OUT: {
-        if (state_time_remaining_ < 0) {
           pair<SdlSurface, SdlSurface> surfaces = next_image_.get();
-          foreground_->SetImage(surfaces.first);
-          background_->SetImage(surfaces.second);
+          foreground_next_->SetImage(surfaces.first);
+          background_next_->SetImage(surfaces.second);
           next_image_ =
               LoadImage(NextImagePath(), screen_size.width, screen_size.height);
 
-          state_time_remaining_ = kFadeInTime;
-          state_ = State::FADE_IN;
+          SetupImagePosition(*foreground_next_, screen_size.width,
+                             screen_size.height);
+          double image_ratio_next =
+              static_cast<double>(foreground_next_->surface_width()) /
+              foreground_next_->surface_height();
+          double image_ratio =
+              static_cast<double>(foreground_->surface_width()) /
+              foreground_->surface_height();
+          double screen_ratio =
+              static_cast<double>(screen_size.width) / screen_size.height;
+          bool v_moved = image_ratio > screen_ratio;
+          bool v_move_next = image_ratio_next > screen_ratio;
+          if (v_moved != v_move_next) {
+            transition_type_ = TransitionType::kNoMove;
+            transition_margin_start_ = transition_margin_end_ = 0;
+          } else if (v_move_next) {
+            transition_type_ = TransitionType::kVMove;
+            transition_margin_start_ = foreground_->top();
+            transition_margin_end_ = foreground_next_->top();
+          } else {
+            transition_type_ = TransitionType::kHMove;
+            transition_margin_start_ = foreground_->left();
+            transition_margin_end_ = foreground_next_->left();
+          }
+
+          state_time_remaining_ = kTransitionTime;
+          state_ = State::kTransition;
         }
         break;
       }
-      case State::FADE_IN: {
+      case State::kTransition: {
         if (state_time_remaining_ < 0) {
+          content_next_->alpha(0);
+
+          swap(content_, content_next_);
+          swap(foreground_, foreground_next_);
+          swap(background_, background_next_);
+
+          transition_type_ = TransitionType::kNone;
+
           state_time_remaining_ = GetIdleTime();
-          state_ = State::IDLE;
+          state_ = State::kIdle;
         }
         break;
       }
     }
 
-    double alpha;
     switch (state_) {
-      case State::IDLE:
-        alpha = 1;
+      case State::kIdle: {
+        SetupImagePosition(*foreground_, screen_size.width, screen_size.height);
+        content_->alpha(1);
+        content_->Draw();
         break;
-      case State::FADE_OUT:
-        alpha = state_time_remaining_ / kFadeOutTime;
+      }
+      case State::kTransition: {
+        double time_progress = 1 - state_time_remaining_ / kTransitionTime;
+        if (time_progress > 1) {
+          time_progress = 1;
+        } else if (time_progress < 0) {
+          time_progress = 0;
+        }
+
+        auto progress = InterpEaseInOut<double>(0, 1, time_progress, 2);
+
+        int margin = static_cast<int>(lround(Lerp<double>(
+            transition_margin_start_, transition_margin_end_, progress)));
+        switch (transition_type_) {
+          case TransitionType::kNone: {
+            throw runtime_error{
+                "Error: transition type is none in transition state"};
+          }
+          case TransitionType::kNoMove: {
+            break;
+          }
+          case TransitionType::kHMove: {
+            for (auto image : {foreground_, foreground_next_}) {
+              image->left(margin);
+              image->right(screen_size.width);
+            }
+            break;
+          }
+          case TransitionType::kVMove: {
+            for (auto image : {foreground_, foreground_next_}) {
+              image->top(margin);
+              image->bottom(screen_size.height - margin);
+            }
+            break;
+          }
+        }
+
+        content_->alpha(1);
+        content_next_->alpha(progress);
+
+        content_->Draw();
+        content_next_->Draw();
+
         break;
-      case State::FADE_IN:
-        alpha = 1 - state_time_remaining_ / kFadeInTime;
-        break;
-    }
-    if (alpha < 0) {
-      alpha = 0;
-    } else if (alpha > 1) {
-      alpha = 1;
+      }
     }
 
     {
@@ -288,37 +379,6 @@ void Application::Run() {
       dest.h = texture_attr.height;
       sdl_renderer_.RenderCopy(texture, nullptr, &dest);
     }
-
-    content_->top(0);
-    content_->left(0);
-    content_->bottom(screen_size.height);
-    content_->right(screen_size.width);
-
-    background_->top(0);
-    background_->left(0);
-    background_->bottom(screen_size.height);
-    background_->right(screen_size.width);
-
-    {
-      int image_width = foreground_->surface_width();
-      int image_height = foreground_->surface_height();
-      double image_ratio = static_cast<double>(image_width) / image_height;
-      double screen_ratio =
-          static_cast<double>(screen_size.width) / screen_size.height;
-
-      if (image_ratio > screen_ratio) {
-        foreground_->left(0);
-        foreground_->top((screen_size.height - image_height) / 2);
-      } else {
-        foreground_->left(screen_size.width - image_width);
-        foreground_->top(0);
-      }
-      foreground_->right(foreground_->left() + image_width);
-      foreground_->bottom(foreground_->top() + image_height);
-    }
-
-    content_->alpha(alpha);
-    content_->Draw();
 
     sdl_renderer_.RenderPresent();
   }
@@ -378,6 +438,17 @@ Application::Application()
   }
   next_image_ =
       LoadImage(NextImagePath(), screen_size.width, screen_size.height);
+
+  {
+    unique_ptr<ViewGroup> content = make_unique<ViewGroup>(sdl_renderer_);
+    unique_ptr<ImageView> foreground = make_unique<ImageView>(sdl_renderer_);
+    unique_ptr<ImageView> background = make_unique<ImageView>(sdl_renderer_);
+    foreground_next_ = foreground.get();
+    background_next_ = background.get();
+    content->AddChild(move(background));
+    content->AddChild(move(foreground));
+    content_next_ = move(content);
+  }
 }
 
 const string& Application::NextImagePath() {

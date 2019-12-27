@@ -11,6 +11,7 @@ class SdlRenderer;
 class ImageView : public View {
  public:
   ImageView(SdlRenderer&, SdlSurface&);
+  using View::View;
   void SetImage(SdlSurface&);
 
   [[nodiscard]] int surface_width() const { return surface_width_; }
@@ -18,9 +19,11 @@ class ImageView : public View {
 
  protected:
   void OnDraw() override;
+  void OnPreDraw() override;
 
  private:
   SdlTexture texture_;
+  double texture_alpha_ = 1;
   int surface_width_{};
   int surface_height_{};
 };

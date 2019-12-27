@@ -33,7 +33,8 @@ class Application {
   static std::uint32_t GetPixelFormat();
 
  private:
-  enum class State { IDLE, FADE_OUT, FADE_IN };
+  enum class State { kIdle, kTransition };
+  enum class TransitionType { kNone, kNoMove, kHMove, kVMove };
 
   SdlApp sdl_app_{};
   SdlTtf sdl_ttf_{};
@@ -44,10 +45,20 @@ class Application {
   std::queue<std::string> image_queue_{};
   std::random_device random_{};
 
-  State state_ = State::IDLE;
+  State state_ = State::kIdle;
+
+  TransitionType transition_type_ = TransitionType::kNone;
+  int transition_margin_start_{};
+  int transition_margin_end_{};
+
   std::unique_ptr<View> content_;
-  ImageView* foreground_;
-  ImageView* background_;
+  ImageView* foreground_{};
+  ImageView* background_{};
+
+  std::unique_ptr<View> content_next_;
+  ImageView* foreground_next_{};
+  ImageView* background_next_{};
+
   std::future<std::pair<SdlSurface, SdlSurface>> next_image_{};
   double state_time_remaining_;
 

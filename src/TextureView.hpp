@@ -19,7 +19,7 @@ class TextureView : public View {
 
  private:
   SdlTexture texture_;
-  double texture_alpha_{};
+  double texture_alpha_ = 1;
   int texture_width_{};
   int texture_height_{};
 

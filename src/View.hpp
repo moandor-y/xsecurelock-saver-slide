@@ -46,7 +46,7 @@ class View {
   int left_{};
   int right_{};
 
-  double alpha_{};
+  double alpha_ = 1;
 };
 }  // namespace xsecurelock_saver_slide
 

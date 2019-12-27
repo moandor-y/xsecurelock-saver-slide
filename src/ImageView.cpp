@@ -1,7 +1,5 @@
 #include "ImageView.hpp"
 
-#include <algorithm>
-
 #include "SdlRenderer.hpp"
 
 namespace xsecurelock_saver_slide {
@@ -35,5 +33,12 @@ void ImageView::SetImage(SdlSurface& surface) {
   texture_ = SdlTexture{renderer(), surface};
   surface_width_ = surface.width();
   surface_height_ = surface.height();
+}
+
+void ImageView::OnPreDraw() {
+  if (texture_alpha_ != alpha()) {
+    texture_.SetTextureAlphaMod(lround(alpha() * 255));
+    texture_alpha_ = alpha();
+  }
 }
 }  // namespace xsecurelock_saver_slide
