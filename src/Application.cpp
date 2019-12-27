@@ -11,8 +11,10 @@
 #include <exception>
 #include <future>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <opencv2/opencv.hpp>
 #include <stdexcept>
 #include <utility>
@@ -29,11 +31,13 @@
 
 namespace xsecurelock_saver_slide {
 namespace {
+using std::accumulate;
 using std::async;
 using std::clog;
 using std::endl;
 using std::exception;
 using std::FILE;
+using std::fixed;
 using std::fread;
 using std::future;
 using std::future_status;
@@ -42,11 +46,16 @@ using std::invalid_argument;
 using std::launch;
 using std::lround;
 using std::make_unique;
+using std::max_element;
+using std::min_element;
 using std::move;
 using std::out_of_range;
 using std::pair;
 using std::put_time;
 using std::runtime_error;
+using std::setfill;
+using std::setprecision;
+using std::setw;
 using std::shuffle;
 using std::string;
 using std::stringstream;
@@ -58,11 +67,11 @@ using std::uniform_real_distribution;
 using std::unique_ptr;
 using std::vector;
 
-using Size = std::int_fast64_t;
-
 constexpr double kIdleTime = 15;
 constexpr double kIdleTimeRandom = 15;
 constexpr double kTransitionTime = 2;
+
+constexpr Size kAveragingFrameCount = 600;
 
 constexpr uint32_t kPixelFormat = SDL_PIXELFORMAT_ARGB8888;
 
@@ -217,7 +226,35 @@ void Application::Run() {
             .count();
     time = now;
 
-    time_delta = 1.0 / 60;
+    ++frame_count_;
+    frame_time_.push_back(time_delta);
+    if (frame_time_.size() > kAveragingFrameCount) {
+      frame_time_.pop_front();
+    }
+    double average_time =
+        accumulate(frame_time_.begin(), frame_time_.end(), double{0}) /
+        frame_time_.size();
+    time_delta = average_time;
+
+    if (frame_count_ % kAveragingFrameCount == 0) {
+      double max_time = *max_element(frame_time_.begin(), frame_time_.end());
+      double min_time = *min_element(frame_time_.begin(), frame_time_.end());
+
+      stringstream stream;
+      stream << "Frame time of past " << frame_time_.size()
+             << " frame at frame " << frame_count_ << ":" << endl;
+      stream << setprecision(6) << fixed << setfill(' ');
+      constexpr int kWidth = 20;
+      stream << setw(kWidth) << "Average";
+      stream << setw(kWidth) << "Max";
+      stream << setw(kWidth) << "Min";
+      stream << endl;
+      stream << setw(kWidth) << average_time;
+      stream << setw(kWidth) << max_time;
+      stream << setw(kWidth) << min_time;
+      stream << endl;
+      clog << stream.str();
+    }
 
     SDL_Event event;
     while (SDL_PollEvent(&event) != 0) {

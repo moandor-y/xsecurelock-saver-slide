@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include <cstdint>
+#include <deque>
 #include <future>
 #include <memory>
 #include <queue>
@@ -22,6 +23,8 @@
 
 namespace xsecurelock_saver_slide {
 class ImageView;
+
+using Size = std::int_fast64_t;
 
 class Application {
  public:
@@ -61,6 +64,9 @@ class Application {
 
   std::future<std::pair<SdlSurface, SdlSurface>> next_image_{};
   double state_time_remaining_;
+
+  Size frame_count_{};
+  std::deque<double> frame_time_;
 
   const std::string& NextImagePath();
   SdlTexture TextureFromSurface(SdlSurface&);
