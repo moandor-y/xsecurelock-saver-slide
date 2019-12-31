@@ -301,10 +301,17 @@ void Application::Run() {
               static_cast<double>(screen_size.width) / screen_size.height;
           bool v_moved = image_ratio > screen_ratio;
           bool v_move_next = image_ratio_next > screen_ratio;
-          if (v_moved != v_move_next) {
+          bool exact_match =
+              foreground_->surface_width() == screen_size.width &&
+              foreground_->surface_height() == screen_size.height;
+          bool exact_match_next =
+              foreground_next_->surface_width() == screen_size.width &&
+              foreground_next_->surface_height() == screen_size.height;
+          if (v_moved != v_move_next && !exact_match && !exact_match_next) {
             transition_type_ = TransitionType::kNoMove;
             transition_margin_start_ = transition_margin_end_ = 0;
-          } else if (v_move_next) {
+          } else if ((v_moved && (v_move_next || exact_match_next)) ||
+                     (exact_match && v_move_next)) {
             transition_type_ = TransitionType::kVMove;
             transition_margin_start_ = foreground_->top();
             transition_margin_end_ = foreground_next_->top();
