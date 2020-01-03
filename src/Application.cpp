@@ -302,11 +302,13 @@ void Application::Run() {
           bool v_moved = image_ratio > screen_ratio;
           bool v_move_next = image_ratio_next > screen_ratio;
           bool exact_match =
-              foreground_->surface_width() == screen_size.width &&
-              foreground_->surface_height() == screen_size.height;
+              foreground_->right() - foreground_->left() == screen_size.width &&
+              foreground_->bottom() - foreground_->top() == screen_size.height;
           bool exact_match_next =
-              foreground_next_->surface_width() == screen_size.width &&
-              foreground_next_->surface_height() == screen_size.height;
+              foreground_next_->right() - foreground_next_->left() ==
+                  screen_size.width &&
+              foreground_next_->bottom() - foreground_next_->top() ==
+                  screen_size.height;
           if (v_moved != v_move_next && !exact_match && !exact_match_next) {
             transition_type_ = TransitionType::kNoMove;
             transition_margin_start_ = transition_margin_end_ = 0;
