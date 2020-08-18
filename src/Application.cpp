@@ -95,7 +95,7 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
       image_height = screen_height;
       image_width = static_cast<int>(lround(image_height * image_ratio));
     }
-    cv::resize(image, image, {image_width, image_height}, 0, 0, CV_INTER_AREA);
+    cv::resize(image, image, {image_width, image_height}, 0, 0, cv::INTER_AREA);
 
     vector<unsigned char> buffer;
     cv::imencode(".bmp", image, buffer);
@@ -117,7 +117,7 @@ future<pair<SdlSurface, SdlSurface>> LoadImage(const string& path,
     }
     image = image(rect);
     cv::resize(image, image, {screen_width, screen_height}, 0, 0,
-               CV_INTER_LANCZOS4);
+               cv::INTER_LANCZOS4);
     cv::GaussianBlur(image, image, {}, screen_width * 0.006);
 
     buffer.clear();
