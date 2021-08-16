@@ -217,6 +217,8 @@ void Application::Run() {
   SdlTtfFont font_large{CreateFont(192)};
   SdlTtfFont font_small{CreateFont(64)};
 
+  SDL_EnableScreenSaver();
+
   auto time = std::chrono::high_resolution_clock::now();
   bool running = true;
   while (running) {
